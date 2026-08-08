@@ -81,11 +81,11 @@ def config_parse(filename: str) -> MazeConfig:
     - Iterate through x & y coordinates and check if they are valid
       and they are inside the grid if no = ConfigError
     """
-    for (x, y) in [entry, exit]:
+    for (x, y) in [entry, exit_]:
         if not (0 <= x < width and 0 <= y < height):
             raise ConfigError(f"Coordinate out of maze bounds: {x}, {y}")
 
-    if entry == exit:
+    if entry == exit_:
         raise ConfigError("ENTRY and EXIT must be different cells")
 
     perfect_str = raw_values["PERFECT"].lower()
@@ -97,9 +97,13 @@ def config_parse(filename: str) -> MazeConfig:
     if not output_file:
         raise ConfigError("OUTPUT_FILE must not be empty")
 
-    seed= int(raw_values["SEED"]) if "SEED" in raw_values else None
-
+    seed = None
+    if "SEED" in raw_values:
+        try:
+            seed = int(raw_values["SEED"])
+        except ValueError:
+            raise ConfigError(f"SEED must be an integer: got {raw_values['SEED']}")
 
     return MazeConfig(
-        width, height, entry, exit_, output_file, perfect_str, seed
+        width, height, entry, exit_, output_file, perfect, seed
         )

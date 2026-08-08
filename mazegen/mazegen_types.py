@@ -91,3 +91,30 @@ def encode_walls(north: bool, east: bool, south: bool, west: bool) -> int:  # fo
         flags |= Wall.W
 
     return flags.value
+
+
+"""When moving from a cell (x, y) to its neighboring cell (nx, ny)
+the movement delta is (nx - x, ny - y)"""
+WALL_DELTA: dict[Wall, Coordinate] = {
+    Wall.N: (0, -1), #North: x stays the same, y decreases by 1 (row above)
+    Wall.E: (1, 0), #East: x increases by 1, y stays the same
+    Wall.S: (0, 1), #South: x stays the same, y increases by 1 (row below)
+    Wall.W: (-1, 0), #West: x decreases by 1, y stays the same
+}
+"""Grid offset (dx, dy) when crossing each wall."""
+
+WALL_OPPOSITE: dict[Wall, Wall] = {
+    Wall.N: Wall.S,
+    Wall.S: Wall.N,
+    Wall.E: Wall.W,
+    Wall.W: Wall.E,
+}
+"""Opposite wall, required to keep neighboring cells consistent."""
+
+WALL_LETTER: dict[Wall, str] = {
+    Wall.N: "N",
+    Wall.E: "E",
+    Wall.S: "S",
+    Wall.W: "W",
+}
+"""Letter used in the solution_path of the output file (Chapter IV.5)."""
