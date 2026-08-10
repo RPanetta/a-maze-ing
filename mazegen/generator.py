@@ -29,7 +29,7 @@ class MazeGenerator:
         self.seed: int | None = seed
 
         self._rng: random.Random = random.Random(seed)
-        self.grid: MazeGrid = self._blank_grid()
+        self.grid: MazeGrid = self.blank_grid()
 
 
     def blank_grid(self) -> MazeGrid:
@@ -76,7 +76,7 @@ class MazeGenerator:
             x, y = stack[-1]
             candidates = [
                 (wall, nx, ny)
-                for wall, nx, ny in self._neighbors(x, y)
+                for wall, nx, ny in self.neighbors(x, y)
                 if (nx, ny) not in visited
             ]
  
@@ -85,7 +85,7 @@ class MazeGenerator:
                 continue
  
             wall, nx, ny = self._rng.choice(candidates)
-            self._carve(x, y, nx, ny, wall)
+            self.carve(x, y, nx, ny, wall)
             visited.add((nx, ny))
             stack.append((nx, ny))
 

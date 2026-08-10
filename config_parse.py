@@ -12,9 +12,9 @@ class MazeConfig:
     width: int
     height: int
     entry: Coordinate
-    exit: Coordinate
+    exit_: Coordinate
     output_file: str
-    perfect_str: bool
+    perfect: bool
     seed: int | None = None
 
 
