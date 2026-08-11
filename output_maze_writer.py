@@ -1,7 +1,9 @@
 from mazegen.mazegen_types import Coordinate, MazeGrid
 
+
 class OutputWriterError(Exception):
     pass
+
 
 def to_hex_digit(value: int) -> str:
     if not (0 <= value <= 15):
@@ -27,8 +29,8 @@ def output_maze_writer(
                 file.write("".join(row_chars) + "\n")
 
             file.write("\n")
-            file.write(f"{entry[0]},{entry[1]}\n")
-            file.write(f"{exit_[0]},{exit_[1]}\n")
+            file.write(f"{entry[0]}, {entry[1]}\n")
+            file.write(f"{exit_[0]}, {exit_[1]}\n")
             file.write(f"{solution_path}\n")
 
     except OSError as e:

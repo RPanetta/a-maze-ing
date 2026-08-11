@@ -3,6 +3,7 @@ from mazegen.mazegen_types import Coordinate
 
 REQUIRED_KEY = ["WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT"]
 
+
 class ConfigError(Exception):
     pass
 
@@ -26,7 +27,7 @@ def coordinate_parse(raw_config: str) -> Coordinate:
     parts = raw_config.split(",")
 
     if len(parts) != 2:
-        raise ConfigError(f"Coordinate must be x,y: got {raw_config}")
+        raise ConfigError(f"Coordinate must be x, y: got {raw_config}")
     try:
         return (int(parts[0].strip()), int(parts[1].strip()))
     except ValueError:

@@ -31,7 +31,6 @@ class Wall(IntFlag):
     S = 4
     W = 8
 
-
 def decode_bitmask(value: int) -> dict[str, bool]:  # for reading
     """
     Decode a wall-bitmask int (0-15) into a dict of open/closed walls.
@@ -64,7 +63,6 @@ def decode_bitmask(value: int) -> dict[str, bool]:  # for reading
         "S": south,
         "W": west
     }
-
 
 def encode_walls(north: bool, east: bool, south: bool, west: bool) -> int:  # for writing
     """

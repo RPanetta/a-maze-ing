@@ -3,8 +3,10 @@ from config_parse import ConfigError, config_parse
 from mazegen import MazeGenerator, MazeGeneratorError, SolverError, solve_bfs
 from output_maze_writer import OutputWriterError, output_maze_writer
 
+
 def run(config_path: str) -> int:
-    """Runs the complete workflow: read the configuration, generate the maze, solve it, and write the output
+    """Runs the complete workflow: read the configuration,
+    generate the maze, solve it, and write the output
     config_path: path to the configuration file
     Returns: int: Exit code (0 on success, 1 on error)"""
     try:
@@ -12,7 +14,7 @@ def run(config_path: str) -> int:
     except ConfigError as err:
         print(f"Error in configuration: {err}")
         return 1
-    
+
     try:
         generator = MazeGenerator(
             width=config.width, height=config.height, seed=config.seed
