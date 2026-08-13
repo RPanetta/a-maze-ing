@@ -238,6 +238,36 @@ class MazeGenerator:
             self.carve(x, y, nx, ny, wall)
             removed += 1
 
+    def is_dead_end(self, x: int, y: int) -> bool:
+        """Checks if a cell is a dead-end (has 3 closed walls)"""
+        if (x, y) in self.pattern_cells:
+            return False
+        return bin(self.grid[y][x]).count('1') == 3
+
+    def remove_dead_end(self, max_tolerated: int = 2) -> None:
+        """Eliminates dead-ends by opening walls toward valid neighbors"""
+        dead_ends: list[Coordinate] = []
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.is_dead_end(x, y):
+                    dead_ends.append((x, y))
+
+        self._rng.shuffle(dead_ends)
+
+        while len(dead_ends) > max_tolerated:
+            x, y = dead_ends.pop()
+            if not self.is_dead_end(x, y):
+                continue
+            
+            candidates = []
+            for wall, nx, ny in self.neighbors(x, y):
+                if (self.grid[y][x] & int(wall)) and (nx, ny) not in self.pattern_cells:
+                    if not self.opens_3x3_block(x, y, nx, ny):
+                        candidates.append((wall, nx, ny))
+            if candidates:
+                wall, nx, ny = self._rng.choice(candidates)
+                self.carve(x, y, nx, ny, wall)
+
     def generate(
         self,
         perfect: bool,
@@ -258,8 +288,8 @@ class MazeGenerator:
 
         self.grid = self.blank_grid()
         self.pattern_cells.clear()
-
-        if perfect:
+        
+        if perfect == True:
             self.add_42_pattern()
 
         if entry in self.pattern_cells or exit_ in self.pattern_cells:
@@ -274,3 +304,4 @@ class MazeGenerator:
 
         if not perfect:
             self.add_loops()
+            self.remove_dead_end()
