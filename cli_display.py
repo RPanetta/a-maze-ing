@@ -34,11 +34,13 @@ PATTERN_COLOUR = "\033[93m"
 
 
 def path_cells(entry: Coordinate, solution_path: str) -> set[Coordinate]:
-    """Walks solution_path from entry, returning every cell it visits.
+    """
+    Walks solution_path from entry, returning every cell it visits.
     entry: (x, y) starting coordinate.
     solution_path: string of N/E/S/W letters, as returned by solve_bfs.
     Returns: set of (x, y) coordinates the path passes through,
-    including entry itself."""
+    including entry itself.
+    """
     x, y = entry
     cells = {(x, y)}
     for letter in solution_path:
@@ -57,16 +59,18 @@ def draw_maze(
     colour_rot: int,
     pattern_cells: set[Coordinate]
 ) -> str:
-    """Renders the maze as an ASCII grid.
+    """
+    Renders the maze as an ASCII grid.
     grid: Maze grid (MazeGrid), indexed as grid[y][x].
-    entry: (x, y) of the entry cell, marked 'S'.
+    entry: (x, y) of the entry cell, marked 'E'.
     exit_: (x, y) of the exit cell, marked 'X'.
     solution_path: N/E/S/W letters from solve_bfs; only used if show_path.
-    show_path: If True, overlay the solution path with a coloured block.
-    colour_rot: Index into WALL_COLOURS used to colour the wall characters.
+    show_path: if True, overlay the solution path with a coloured block.
+    colour_rot: index into WALL_COLOURS used to colour the wall characters.
     pattern_cells: Coordinates of the hidden '42' pattern cells, marked
     with a coloured block so the pattern stands out.
-    Returns: str: multi-line ASCII rendering of the maze, ready to print."""
+    returns: str: multi-line ASCII rendering of the maze, ready to print.
+    """
     height = len(grid)
     width = len(grid[0]) if height else 0
     colour = WALL_COLOURS[colour_rot % len(WALL_COLOURS)]
@@ -74,50 +78,50 @@ def draw_maze(
     visited = path_cells(entry, solution_path) \
         if show_path and solution_path else set()
 
-    def h_wall(open_: bool) -> str:
-        """Horizontal wall segment: solid line if closed, blank if open."""
+    def horizont_wall(open_: bool) -> str:
+        """Horizontal wall segment: '---' line if closed, blank if open."""
         return "   " if open_ else f"{colour}---{RESET}"
 
-    def v_wall(open_: bool) -> str:
-        """Vertical wall character: space if open, bar if closed."""
+    def vertical_wall(open_: bool) -> str:
+        """Vertical wall character: three spaces if open, pipebar if closed."""
         return " " if open_ else f"{colour}|{RESET}"
 
     lines: list[str] = []
 
     # Top border: every cell's own north wall.
-    top = "+"
+    top = f"{colour}+{RESET}"
     for x in range(width):
         wall = grid[0][x]
-        top += h_wall(not (wall & int(Wall.N))) + "+"
+        top += horizont_wall(not (wall & Wall.N)) + f"{colour}+{RESET}"
     lines.append(top)
 
     for y in range(height):
         row = ""
         for x in range(width):
             wall = grid[y][x]
-            row += v_wall(not (wall & int(Wall.W)))
+            row += vertical_wall(not (wall & Wall.W))  # right border of cell
             if (x, y) == entry:
                 cell_char = ENTRY_CHAR
             elif (x, y) == exit_:
                 cell_char = EXIT_CHAR
             elif (x, y) in pattern_cells:
-                cell_char = f"{PATTERN_COLOUR}{PATTERN_CHAR}{RESET}"
+                cell_char = f"{PATTERN_COLOUR}{PATTERN_CHAR}"
             elif (x, y) in visited:
                 cell_char = f"{PATH_COLOUR}{PATH_CHAR}{RESET}"
             else:
                 cell_char = " "
             row += f" {cell_char} "
 
-        # Right border of the row: east wall of the last cell.
+        # right border of the row: east wall of the last cell.
         east_wall = grid[y][width - 1] if width else 0
-        row += v_wall(not (east_wall & int(Wall.E)))
+        row += vertical_wall(not (east_wall & Wall.E))
         lines.append(row)
 
-        # Bottom border of this row: every cell's own south wall.
-        bottom = "+"
+        # bottom border of this row: every cell's own south wall.
+        bottom = f"{colour}+{RESET}"
         for x in range(width):
             wall = grid[y][x]
-            bottom += h_wall(not (wall & int(Wall.S))) + "+"
+            bottom += horizont_wall(not (wall & Wall.S)) + f"{colour}+{RESET}"
         lines.append(bottom)
 
     return "\n".join(lines)

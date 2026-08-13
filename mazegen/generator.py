@@ -78,7 +78,7 @@ class MazeGenerator:
             sys.stderr.write(
                 "Warning: Maze dimensions too small for '42' pattern\n"
             )
-            return
+            sys.exit()
 
         start_x = (self.width - PATTERN_42_WIDTH) // 2
         start_y = (self.height - PATTERN_42_HEIGHT) // 2
@@ -258,10 +258,11 @@ class MazeGenerator:
             x, y = dead_ends.pop()
             if not self.is_dead_end(x, y):
                 continue
-            
+
             candidates = []
             for wall, nx, ny in self.neighbors(x, y):
-                if (self.grid[y][x] & int(wall)) and (nx, ny) not in self.pattern_cells:
+                if (self.grid[y][x] & int(wall)) \
+                        and (nx, ny) not in self.pattern_cells:
                     if not self.opens_3x3_block(x, y, nx, ny):
                         candidates.append((wall, nx, ny))
             if candidates:
@@ -288,8 +289,8 @@ class MazeGenerator:
 
         self.grid = self.blank_grid()
         self.pattern_cells.clear()
-        
-        if perfect == True:
+
+        if perfect is True:
             self.add_42_pattern()
 
         if entry in self.pattern_cells or exit_ in self.pattern_cells:
