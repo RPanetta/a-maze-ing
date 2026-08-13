@@ -45,7 +45,7 @@ def config_parse(filename: str) -> MazeConfig:
 
     try:
         with open(filename) as file:
-            for line_numb, line in enumerate(file, start=1):  # file object treated and iterated through line by line
+            for line_numb, line in enumerate(file, start=1):
                 stripped = line.strip()
                 if not stripped or stripped.startswith("#"):
                     continue
@@ -90,7 +90,7 @@ def config_parse(filename: str) -> MazeConfig:
         raise ConfigError("ENTRY and EXIT must be different cells")
 
     perfect_str = raw_values["PERFECT"].lower()
-    if perfect_str not in ["true", "false"]:  # not in checks whether it matches ANY of the values in the collection
+    if perfect_str not in ["true", "false"]:
         raise ConfigError("PERFECT must be True or False")
     perfect = (perfect_str == "true")
 
@@ -103,7 +103,7 @@ def config_parse(filename: str) -> MazeConfig:
         try:
             seed = int(raw_values["SEED"])
         except ValueError:
-            raise ConfigError(f"SEED must be an integer: got {raw_values['SEED']}")
+            raise ConfigError(f"SEED must be an integer: {raw_values['SEED']}")
 
     return MazeConfig(
         width, height, entry, exit_, output_file, perfect, seed

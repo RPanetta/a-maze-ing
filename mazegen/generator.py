@@ -38,7 +38,7 @@ class MazeGenerator:
     grid: The resulting maze grid (MazeGrid), indexed as grid[y][x]"""
 
     def __init__(self, width: int, height: int, seed: int | None = None
-    ) -> None:
+                 ) -> None:
 
         """Initializes the maze generator with the specified maze dimensions.
         width: Number of columns (>= 1).
@@ -69,7 +69,7 @@ class MazeGenerator:
             [ALL_WALLS_CLOSED for _ in range(self.width)]
             for _ in range(self.height)
         ]
-    
+
     def add_42_pattern(self) -> None:
         """Draws the 42 pattern in the center of the maze.
         If the maze is too small, prints a warning to stderr"""
@@ -79,17 +79,17 @@ class MazeGenerator:
                 "Warning: Maze dimensions too small for '42' pattern\n"
             )
             return
-        
+
         start_x = (self.width - PATTERN_42_WIDTH) // 2
         start_y = (self.height - PATTERN_42_HEIGHT) // 2
-        
+
         for py in range(PATTERN_42_HEIGHT):
             for px in range(PATTERN_42_WIDTH):
                 if PATTERN_42[py][px] == 1:
                     gx = start_x + px
                     gy = start_y + py
                     self.pattern_cells.add((gx, gy))
-                    #the cell is completely enclosed
+                    # the cell is completely enclosed
                     self.grid[gy][gx] = ALL_WALLS_CLOSED
 
     def neighbors(self, x: int, y: int) -> list[tuple[Wall, int, int]]:
@@ -115,12 +115,14 @@ class MazeGenerator:
         ny: Y-coordinate of the neighboring cell
         wall: Wall on the source cell (x, y)
         facing the neighboring cell(nx, ny)"""
-        self.grid[y][x] &= ~int(wall)  #It operates on the binary representation of integers and performs AND operation on each corresponding bit
+        self.grid[y][x] &= ~int(wall)
         self.grid[ny][nx] &= ~int(WALL_OPPOSITE[wall])
 
     def backtracker(self, start: Coordinate) -> None:
-        """Generates a perfect maze,randomly moves to an unvisited neighbor
-        and removes the shared wall. When there are no more unvisited neighbors"""
+        """
+        Generates a perfect maze,randomly moves to an unvisited neighbor
+        and removes the shared wall when there are no more unvisited neighbors
+        """
         visited: set[Coordinate] = {start}
         stack: list[Coordinate] = [start]
 
@@ -130,6 +132,7 @@ class MazeGenerator:
                 (wall, nx, ny)
                 for wall, nx, ny in self.neighbors(x, y)
                 if (nx, ny) not in visited
+                and (nx, ny) not in self.pattern_cells
             ]
 
             if not candidates:
@@ -171,11 +174,13 @@ class MazeGenerator:
     def fully_open(
         self, block: set[Coordinate], x: int, y: int, nx: int, ny: int
     ) -> bool:
-        """Simulates opening the candidate wall and checks whether the 3x3 block
+        """
+        Simulates opening the candidate wall and checks whether the 3x3 block
         would have all of its internal walls open.
         Returns:
         bool: True if, after the simulated opening,
-        all 12 internal walls of the 3x3 block would be open."""
+        all 12 internal walls of the 3x3 block would be open.
+        """
         for bx, by in block:
             walls = self.grid[by][bx]
             for wall, (dx, dy) in WALL_DELTA.items():
@@ -196,12 +201,14 @@ class MazeGenerator:
     def add_loops(
         self, min_loops: int = 2, max_extra_ratio: float = 0.06
     ) -> None:
-        """adds loops (removes internal walls) to a perfect maze
+        """
+        Adds loops (removes internal walls) to a perfect maze
         Converts the spanning tree into a graph with cycles (PERFECT=False),
         while avoiding the creation of fully open 3x3 blocks
         min_loops: Minimum number of extra walls to attempt to remove
-        max_extra_ratio: Fraction of the total number of cells used as the upper limit,
-        preventing the maze from becoming too open."""
+        max_extra_ratio: Fraction of the total number of cells used as
+        the upper limit, preventing the maze from becoming too open.
+        """
 
         max_extra = max(
             min_loops, int(self.width * self.height * max_extra_ratio)
@@ -214,6 +221,8 @@ class MazeGenerator:
                     continue
                 for wall, nx, ny in self.neighbors(x, y):
                     if wall in (Wall.S, Wall.W):
+                        continue
+                    if (nx, ny) in self.pattern_cells:
                         continue
                     if self.grid[y][x] & int(wall):
                         candidates.append((x, y, nx, ny, wall))
@@ -250,10 +259,11 @@ class MazeGenerator:
         self.grid = self.blank_grid()
         self.pattern_cells.clear()
 
-        self.add_42_pattern()
+        if perfect:
+            self.add_42_pattern()
 
         if entry in self.pattern_cells or exit_ in self.pattern_cells:
-            raise MazeGenerator(
+            raise MazeGeneratorError(
                 "ENTRY or EXIT conflicts with '42' pattern cells"
             )
 

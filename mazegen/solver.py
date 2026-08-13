@@ -29,7 +29,11 @@ def solve_bfs(grid: MazeGrid, entry: Coordinate, exit_: Coordinate) -> str:
         return ""
 
     visited: set[Coordinate] = {entry}
-    queue: deque[tuple[Coordinate, str]] = deque()  #deque: it's a type of data structure that allows to add and remove elements from both ends efficiently
+    """"
+    deque: it's a type of data structure that allows
+    to add and remove elements from both ends efficiently.
+    """
+    queue: deque[tuple[Coordinate, str]] = deque()
     queue.append((entry, ""))
 
     while queue:
