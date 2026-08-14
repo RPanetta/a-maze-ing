@@ -72,15 +72,19 @@ class MazeGenerator:
 
     def add_42_pattern(self) -> None:
         """Draws the 42 pattern in the center of the maze.
-        If the maze is too small, prints a warning to stderr"""
+        If the maze is too small, prints a warning to stderr.
+        The pattern is horizontally aligned so its gap column always
+        lands on the maze's centre x-coordinate, guaranteeing the
+        centre cell is never part of either digit."""
 
         if self.width < MIN_WIDTH or self.height < MIN_HEIGHT:
             sys.stderr.write(
                 "Warning: Maze dimensions too small for '42' pattern\n"
             )
-            sys.exit()
+            return
 
-        start_x = (self.width - PATTERN_42_WIDTH) // 2
+        center_x = self.width // 2
+        start_x = center_x - 3   # column 3 is the pattern's gap column
         start_y = (self.height - PATTERN_42_HEIGHT) // 2
 
         for py in range(PATTERN_42_HEIGHT):
@@ -89,7 +93,6 @@ class MazeGenerator:
                     gx = start_x + px
                     gy = start_y + py
                     self.pattern_cells.add((gx, gy))
-                    # the cell is completely enclosed
                     self.grid[gy][gx] = ALL_WALLS_CLOSED
 
     def neighbors(self, x: int, y: int) -> list[tuple[Wall, int, int]]:
@@ -269,6 +272,31 @@ class MazeGenerator:
                 wall, nx, ny = self._rng.choice(candidates)
                 self.carve(x, y, nx, ny, wall)
 
+    def open_one_wall(self, x: int, y: int) -> None:
+        """Opens one valid wall on the given cell, if any exist."""
+        candidates = []
+        for wall, nx, ny in self.neighbors(x, y):
+            if (self.grid[y][x] & int(wall)) \
+                    and (nx, ny) not in self.pattern_cells:
+                if not self.opens_3x3_block(x, y, nx, ny):
+                    candidates.append((wall, nx, ny))
+        if candidates:
+            wall, nx, ny = self._rng.choice(candidates)
+            self.carve(x, y, nx, ny, wall)
+
+    def ensure_corners_and_center_open(self) -> None:
+        """Guarantees the four corners and centre cell aren't dead ends."""
+        cells_to_check = [
+            (0, 0),
+            (self.width - 1, 0),
+            (0, self.height - 1),
+            (self.width - 1, self.height - 1),
+            (self.width // 2, self.height // 2),
+        ]
+        for x, y in cells_to_check:
+            if self.is_dead_end(x, y):
+                self.open_one_wall(x, y)
+
     def generate(
         self,
         perfect: bool,
@@ -290,8 +318,7 @@ class MazeGenerator:
         self.grid = self.blank_grid()
         self.pattern_cells.clear()
 
-        if perfect is True:
-            self.add_42_pattern()
+        self.add_42_pattern()
 
         if entry in self.pattern_cells or exit_ in self.pattern_cells:
             raise MazeGeneratorError(
@@ -306,3 +333,4 @@ class MazeGenerator:
         if not perfect:
             self.add_loops()
             self.remove_dead_end()
+            self.ensure_corners_and_center_open()
